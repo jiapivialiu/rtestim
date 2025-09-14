@@ -14,4 +14,10 @@ Rcpp::NumericVector rcpp_wtvdz(
     double lam, Rcpp::NumericVector x
 );
 
+void tvd(int n, double *y, double lambda, double *theta);
+Rcpp::NumericVector rcpp_tvd(Rcpp::NumericVector y, double lambda);
+
+void wtvd(int n, double *y, double lambda, double *w, double *theta);
+Rcpp::NumericVector rcpp_wtvd(Rcpp::NumericVector y, double lambda, Rcpp::NumericVector weights);
+
 #endif

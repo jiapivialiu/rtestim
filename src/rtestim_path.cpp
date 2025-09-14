@@ -31,6 +31,7 @@ List rtestim_path(NumericVector y,
                   double lambda_min_ratio = 1e-4,
                   double ls_alpha = 0.5,
                   double ls_gamma = 0.9,
+                  int linear_solver = 2,
                   int verbose = 0) {
   int n = y.size();
 
@@ -87,13 +88,13 @@ List rtestim_path(NumericVector y,
     Rcpp::checkUserInterrupt();
 
     if (korder == 0) {
-      beta = tvdenoising::rcpp_wtvd(y / w, lambda[i], w);
+      beta = rcpp_wtvd(y, lambda[i], w);
       niter[i] = 0;
     } else {
       _rho = (rho < 0) ? lambda[i] : rho;
       prox_newton(maxiter_newton, maxiter, maxiter_line, n, korder, y, x, w,
                   beta, alpha, u, lambda[i], _rho, ls_alpha, ls_gamma, DkDk,
-                  tolerance, iters);
+                  tolerance, linear_solver, iters);
       niter[i] = iters;
       maxiter -= iters + 1;
       if (maxiter < 0) nsols = i + 1;

@@ -15,8 +15,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // prox_newton_testing
-Rcpp::List prox_newton_testing(int M, int Minner, int Mline, int korder, Rcpp::NumericVector const& y, Rcpp::NumericVector const& x, Rcpp::NumericVector const& w, double lambda, double ls_alpha, double ls_gamma, double tol);
-RcppExport SEXP _rtestim_prox_newton_testing(SEXP MSEXP, SEXP MinnerSEXP, SEXP MlineSEXP, SEXP korderSEXP, SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP lambdaSEXP, SEXP ls_alphaSEXP, SEXP ls_gammaSEXP, SEXP tolSEXP) {
+Rcpp::List prox_newton_testing(int M, int Minner, int Mline, int korder, Rcpp::NumericVector const& y, Rcpp::NumericVector const& x, Rcpp::NumericVector const& w, double lambda, double ls_alpha, double ls_gamma, int linear_solver, double tol);
+RcppExport SEXP _rtestim_prox_newton_testing(SEXP MSEXP, SEXP MinnerSEXP, SEXP MlineSEXP, SEXP korderSEXP, SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP lambdaSEXP, SEXP ls_alphaSEXP, SEXP ls_gammaSEXP, SEXP linear_solverSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -30,14 +30,56 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type ls_alpha(ls_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type ls_gamma(ls_gammaSEXP);
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    rcpp_result_gen = Rcpp::wrap(prox_newton_testing(M, Minner, Mline, korder, y, x, w, lambda, ls_alpha, ls_gamma, tol));
+    rcpp_result_gen = Rcpp::wrap(prox_newton_testing(M, Minner, Mline, korder, y, x, w, lambda, ls_alpha, ls_gamma, linear_solver, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// smat_to_mat
+Eigen::MatrixXd smat_to_mat(const Eigen::SparseMatrix<double>& sparseMat, int k, bool equal_spaced);
+RcppExport SEXP _rtestim_smat_to_mat(SEXP sparseMatSEXP, SEXP kSEXP, SEXP equal_spacedSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const Eigen::SparseMatrix<double>& >::type sparseMat(sparseMatSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< bool >::type equal_spaced(equal_spacedSEXP);
+    rcpp_result_gen = Rcpp::wrap(smat_to_mat(sparseMat, k, equal_spaced));
+    return rcpp_result_gen;
+END_RCPP
+}
+// configure_denseD_test
+Rcpp::List configure_denseD_test(Eigen::VectorXd x, int k);
+RcppExport SEXP _rtestim_configure_denseD_test(SEXP xSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(configure_denseD_test(x, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// linear_single_solve_test
+Eigen::VectorXd linear_single_solve_test(int linear_solver, const Eigen::VectorXd y, const Eigen::ArrayXd weights, Eigen::VectorXd x, double rho, const Eigen::VectorXd adj_mean);
+RcppExport SEXP _rtestim_linear_single_solve_test(SEXP linear_solverSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP xSEXP, SEXP rhoSEXP, SEXP adj_meanSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::ArrayXd >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type x(xSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd >::type adj_mean(adj_meanSEXP);
+    rcpp_result_gen = Rcpp::wrap(linear_single_solve_test(linear_solver, y, weights, x, rho, adj_mean));
     return rcpp_result_gen;
 END_RCPP
 }
 // rtestim_path
-List rtestim_path(NumericVector y, NumericVector x, NumericVector w, int korder, NumericVector lambda, double lambdamax, double lambdamin, int nsol, double rho, int maxiter, int maxiter_newton, int maxiter_line, double tolerance, double lambda_min_ratio, double ls_alpha, double ls_gamma, int verbose);
-RcppExport SEXP _rtestim_rtestim_path(SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP korderSEXP, SEXP lambdaSEXP, SEXP lambdamaxSEXP, SEXP lambdaminSEXP, SEXP nsolSEXP, SEXP rhoSEXP, SEXP maxiterSEXP, SEXP maxiter_newtonSEXP, SEXP maxiter_lineSEXP, SEXP toleranceSEXP, SEXP lambda_min_ratioSEXP, SEXP ls_alphaSEXP, SEXP ls_gammaSEXP, SEXP verboseSEXP) {
+List rtestim_path(NumericVector y, NumericVector x, NumericVector w, int korder, NumericVector lambda, double lambdamax, double lambdamin, int nsol, double rho, int maxiter, int maxiter_newton, int maxiter_line, double tolerance, double lambda_min_ratio, double ls_alpha, double ls_gamma, int linear_solver, int verbose);
+RcppExport SEXP _rtestim_rtestim_path(SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP korderSEXP, SEXP lambdaSEXP, SEXP lambdamaxSEXP, SEXP lambdaminSEXP, SEXP nsolSEXP, SEXP rhoSEXP, SEXP maxiterSEXP, SEXP maxiter_newtonSEXP, SEXP maxiter_lineSEXP, SEXP toleranceSEXP, SEXP lambda_min_ratioSEXP, SEXP ls_alphaSEXP, SEXP ls_gammaSEXP, SEXP linear_solverSEXP, SEXP verboseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -57,8 +99,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type lambda_min_ratio(lambda_min_ratioSEXP);
     Rcpp::traits::input_parameter< double >::type ls_alpha(ls_alphaSEXP);
     Rcpp::traits::input_parameter< double >::type ls_gamma(ls_gammaSEXP);
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
     Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(rtestim_path(y, x, w, korder, lambda, lambdamax, lambdamin, nsol, rho, maxiter, maxiter_newton, maxiter_line, tolerance, lambda_min_ratio, ls_alpha, ls_gamma, verbose));
+    rcpp_result_gen = Rcpp::wrap(rtestim_path(y, x, w, korder, lambda, lambdamax, lambdamin, nsol, rho, maxiter, maxiter_newton, maxiter_line, tolerance, lambda_min_ratio, ls_alpha, ls_gamma, linear_solver, verbose));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -79,6 +122,77 @@ RcppExport SEXP _rtestim_rcpp_tvdz(SEXP ySEXP, SEXP zSEXP, SEXP lambdaSEXP) {
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
         rcpp_result_gen = PROTECT(_rtestim_rcpp_tvdz_try(ySEXP, zSEXP, lambdaSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error("%s", CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// rcpp_tvd
+NumericVector rcpp_tvd(NumericVector y, double lambda);
+static SEXP _rtestim_rcpp_tvd_try(SEXP ySEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_tvd(y, lambda));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _rtestim_rcpp_tvd(SEXP ySEXP, SEXP lambdaSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_rtestim_rcpp_tvd_try(ySEXP, lambdaSEXP));
+    }
+    Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
+    if (rcpp_isInterrupt_gen) {
+        UNPROTECT(1);
+        Rf_onintr();
+    }
+    bool rcpp_isLongjump_gen = Rcpp::internal::isLongjumpSentinel(rcpp_result_gen);
+    if (rcpp_isLongjump_gen) {
+        Rcpp::internal::resumeJump(rcpp_result_gen);
+    }
+    Rboolean rcpp_isError_gen = Rf_inherits(rcpp_result_gen, "try-error");
+    if (rcpp_isError_gen) {
+        SEXP rcpp_msgSEXP_gen = Rf_asChar(rcpp_result_gen);
+        UNPROTECT(1);
+        Rf_error("%s", CHAR(rcpp_msgSEXP_gen));
+    }
+    UNPROTECT(1);
+    return rcpp_result_gen;
+}
+// rcpp_wtvd
+NumericVector rcpp_wtvd(NumericVector y, double lambda, NumericVector weights);
+static SEXP _rtestim_rcpp_wtvd_try(SEXP ySEXP, SEXP lambdaSEXP, SEXP weightsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type y(ySEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type weights(weightsSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_wtvd(y, lambda, weights));
+    return rcpp_result_gen;
+END_RCPP_RETURN_ERROR
+}
+RcppExport SEXP _rtestim_rcpp_wtvd(SEXP ySEXP, SEXP lambdaSEXP, SEXP weightsSEXP) {
+    SEXP rcpp_result_gen;
+    {
+        Rcpp::RNGScope rcpp_rngScope_gen;
+        rcpp_result_gen = PROTECT(_rtestim_rcpp_wtvd_try(ySEXP, lambdaSEXP, weightsSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -248,6 +362,87 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_dk_mat
+Eigen::SparseMatrix<double> get_dk_mat(int k, NumericVector xd, bool tf_weighting);
+RcppExport SEXP _rtestim_get_dk_mat(SEXP kSEXP, SEXP xdSEXP, SEXP tf_weightingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type xd(xdSEXP);
+    Rcpp::traits::input_parameter< bool >::type tf_weighting(tf_weightingSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_dk_mat(k, xd, tf_weighting));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_penalty_mat
+Eigen::SparseMatrix<double> get_penalty_mat(int k, NumericVector xd);
+RcppExport SEXP _rtestim_get_penalty_mat(SEXP kSEXP, SEXP xdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type xd(xdSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_penalty_mat(k, xd));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_lambda_max
+double get_lambda_max(const NumericVector& x, const Eigen::VectorXd& y, const Eigen::ArrayXd& weights, int k);
+RcppExport SEXP _rtestim_get_lambda_max(SEXP xSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const Eigen::VectorXd& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const Eigen::ArrayXd& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_lambda_max(x, y, weights, k));
+    return rcpp_result_gen;
+END_RCPP
+}
+// calc_degrees_of_freedom
+int calc_degrees_of_freedom(Eigen::VectorXd const& v, int k, double tol);
+RcppExport SEXP _rtestim_calc_degrees_of_freedom(SEXP vSEXP, SEXP kSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd const& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(calc_degrees_of_freedom(v, k, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// get_lambda_seq_r
+Eigen::VectorXd get_lambda_seq_r(Eigen::VectorXd lambda, double lambda_max, double lambda_min, double lambda_min_ratio, int n_lambda);
+RcppExport SEXP _rtestim_get_lambda_seq_r(SEXP lambdaSEXP, SEXP lambda_maxSEXP, SEXP lambda_minSEXP, SEXP lambda_min_ratioSEXP, SEXP n_lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_max(lambda_maxSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_min(lambda_minSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda_min_ratio(lambda_min_ratioSEXP);
+    Rcpp::traits::input_parameter< int >::type n_lambda(n_lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_lambda_seq_r(lambda, lambda_max, lambda_min, lambda_min_ratio, n_lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Dkv
+Eigen::VectorXd Dkv(Eigen::VectorXd v, int k, const NumericVector& xd, bool tf_weighting);
+RcppExport SEXP _rtestim_Dkv(SEXP vSEXP, SEXP kSEXP, SEXP xdSEXP, SEXP tf_weightingSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Eigen::VectorXd >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type xd(xdSEXP);
+    Rcpp::traits::input_parameter< bool >::type tf_weighting(tf_weightingSEXP);
+    rcpp_result_gen = Rcpp::wrap(Dkv(v, k, xd, tf_weighting));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpp_wtvdz
 NumericVector rcpp_wtvdz(NumericVector y, NumericVector z, double lambda, NumericVector weights);
 static SEXP _rtestim_rcpp_wtvdz_try(SEXP ySEXP, SEXP zSEXP, SEXP lambdaSEXP, SEXP weightsSEXP) {
@@ -291,6 +486,8 @@ static int _rtestim_RcppExport_validate(const char* sig) {
     static std::set<std::string> signatures;
     if (signatures.empty()) {
         signatures.insert("NumericVector(*rcpp_tvdz)(NumericVector,NumericVector,double)");
+        signatures.insert("NumericVector(*rcpp_tvd)(NumericVector,double)");
+        signatures.insert("NumericVector(*rcpp_wtvd)(NumericVector,double,NumericVector)");
         signatures.insert("NumericVector(*rcpp_wtvdz)(NumericVector,NumericVector,double,NumericVector)");
     }
     return signatures.find(sig) != signatures.end();
@@ -299,15 +496,22 @@ static int _rtestim_RcppExport_validate(const char* sig) {
 // registerCCallable (register entry points for exported C++ functions)
 RcppExport SEXP _rtestim_RcppExport_registerCCallable() { 
     R_RegisterCCallable("rtestim", "_rtestim_rcpp_tvdz", (DL_FUNC)_rtestim_rcpp_tvdz_try);
+    R_RegisterCCallable("rtestim", "_rtestim_rcpp_tvd", (DL_FUNC)_rtestim_rcpp_tvd_try);
+    R_RegisterCCallable("rtestim", "_rtestim_rcpp_wtvd", (DL_FUNC)_rtestim_rcpp_wtvd_try);
     R_RegisterCCallable("rtestim", "_rtestim_rcpp_wtvdz", (DL_FUNC)_rtestim_rcpp_wtvdz_try);
     R_RegisterCCallable("rtestim", "_rtestim_RcppExport_validate", (DL_FUNC)_rtestim_RcppExport_validate);
     return R_NilValue;
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rtestim_prox_newton_testing", (DL_FUNC) &_rtestim_prox_newton_testing, 11},
-    {"_rtestim_rtestim_path", (DL_FUNC) &_rtestim_rtestim_path, 17},
+    {"_rtestim_prox_newton_testing", (DL_FUNC) &_rtestim_prox_newton_testing, 12},
+    {"_rtestim_smat_to_mat", (DL_FUNC) &_rtestim_smat_to_mat, 3},
+    {"_rtestim_configure_denseD_test", (DL_FUNC) &_rtestim_configure_denseD_test, 2},
+    {"_rtestim_linear_single_solve_test", (DL_FUNC) &_rtestim_linear_single_solve_test, 6},
+    {"_rtestim_rtestim_path", (DL_FUNC) &_rtestim_rtestim_path, 18},
     {"_rtestim_rcpp_tvdz", (DL_FUNC) &_rtestim_rcpp_tvdz, 3},
+    {"_rtestim_rcpp_tvd", (DL_FUNC) &_rtestim_rcpp_tvd, 2},
+    {"_rtestim_rcpp_wtvd", (DL_FUNC) &_rtestim_rcpp_wtvd, 3},
     {"_rtestim_get_Dtil", (DL_FUNC) &_rtestim_get_Dtil, 2},
     {"_rtestim_get_D", (DL_FUNC) &_rtestim_get_D, 2},
     {"_rtestim_create_lambda_test", (DL_FUNC) &_rtestim_create_lambda_test, 5},
@@ -319,6 +523,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_rtestim_line_search", (DL_FUNC) &_rtestim_line_search, 12},
     {"_rtestim_compute_gcd", (DL_FUNC) &_rtestim_compute_gcd, 1},
     {"_rtestim_calc_delays", (DL_FUNC) &_rtestim_calc_delays, 2},
+    {"_rtestim_get_dk_mat", (DL_FUNC) &_rtestim_get_dk_mat, 3},
+    {"_rtestim_get_penalty_mat", (DL_FUNC) &_rtestim_get_penalty_mat, 2},
+    {"_rtestim_get_lambda_max", (DL_FUNC) &_rtestim_get_lambda_max, 4},
+    {"_rtestim_calc_degrees_of_freedom", (DL_FUNC) &_rtestim_calc_degrees_of_freedom, 3},
+    {"_rtestim_get_lambda_seq_r", (DL_FUNC) &_rtestim_get_lambda_seq_r, 5},
+    {"_rtestim_Dkv", (DL_FUNC) &_rtestim_Dkv, 4},
     {"_rtestim_rcpp_wtvdz", (DL_FUNC) &_rtestim_rcpp_wtvdz, 4},
     {"_rtestim_RcppExport_registerCCallable", (DL_FUNC) &_rtestim_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}

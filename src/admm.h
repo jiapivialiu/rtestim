@@ -14,6 +14,7 @@ void admm_gauss(int M,
                 double lam_z,
                 Eigen::SparseMatrix<double> const& DD,
                 double tol,
+                int linear_solver,
                 int& iter);
 void prox_newton(int M,
                  int& Minner,
@@ -32,6 +33,7 @@ void prox_newton(int M,
                  double gamma,
                  Eigen::SparseMatrix<double> const& DD,
                  double tol,
+                 int linear_solver,
                  int& total_iter);
 Rcpp::List prox_newton_testing(int M,
                                int Minner,
@@ -43,5 +45,6 @@ Rcpp::List prox_newton_testing(int M,
                                double lambda,
                                double ls_alpha,
                                double ls_gamma,
+                               int linear_solver,
                                double tol);
 #endif

@@ -46,6 +46,48 @@ namespace rtestim {
         return Rcpp::as<NumericVector >(rcpp_result_gen);
     }
 
+    inline NumericVector rcpp_tvd(NumericVector y, double lambda) {
+        typedef SEXP(*Ptr_rcpp_tvd)(SEXP,SEXP);
+        static Ptr_rcpp_tvd p_rcpp_tvd = NULL;
+        if (p_rcpp_tvd == NULL) {
+            validateSignature("NumericVector(*rcpp_tvd)(NumericVector,double)");
+            p_rcpp_tvd = (Ptr_rcpp_tvd)R_GetCCallable("rtestim", "_rtestim_rcpp_tvd");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_rcpp_tvd(Shield<SEXP>(Rcpp::wrap(y)), Shield<SEXP>(Rcpp::wrap(lambda)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<NumericVector >(rcpp_result_gen);
+    }
+
+    inline NumericVector rcpp_wtvd(NumericVector y, double lambda, NumericVector weights) {
+        typedef SEXP(*Ptr_rcpp_wtvd)(SEXP,SEXP,SEXP);
+        static Ptr_rcpp_wtvd p_rcpp_wtvd = NULL;
+        if (p_rcpp_wtvd == NULL) {
+            validateSignature("NumericVector(*rcpp_wtvd)(NumericVector,double,NumericVector)");
+            p_rcpp_wtvd = (Ptr_rcpp_wtvd)R_GetCCallable("rtestim", "_rtestim_rcpp_wtvd");
+        }
+        RObject rcpp_result_gen;
+        {
+            RNGScope RCPP_rngScope_gen;
+            rcpp_result_gen = p_rcpp_wtvd(Shield<SEXP>(Rcpp::wrap(y)), Shield<SEXP>(Rcpp::wrap(lambda)), Shield<SEXP>(Rcpp::wrap(weights)));
+        }
+        if (rcpp_result_gen.inherits("interrupted-error"))
+            throw Rcpp::internal::InterruptedException();
+        if (Rcpp::internal::isLongjumpSentinel(rcpp_result_gen))
+            throw Rcpp::LongjumpException(rcpp_result_gen);
+        if (rcpp_result_gen.inherits("try-error"))
+            throw Rcpp::exception(Rcpp::as<std::string>(rcpp_result_gen).c_str());
+        return Rcpp::as<NumericVector >(rcpp_result_gen);
+    }
+
     inline NumericVector rcpp_wtvdz(NumericVector y, NumericVector z, double lambda, NumericVector weights) {
         typedef SEXP(*Ptr_rcpp_wtvdz)(SEXP,SEXP,SEXP,SEXP);
         static Ptr_rcpp_wtvdz p_rcpp_wtvdz = NULL;

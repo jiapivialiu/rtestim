@@ -1,16 +1,19 @@
-#include <RcppEigen.h>
 #include <Eigen/Sparse>
-#include <tvdenoising.h>
+#include <RcppEigen.h>
+#include "linear_system.h"
+#include "kf_utils.h"
 #include "utils.h"
+#include "dptf.h"
 #include "dptf.h"
 #include "admm.h"
 
 typedef Eigen::COLAMDOrdering<int> Ord;
+Eigen::SparseQR<SparseMatrix<double>, Ord> qradmm;
 
 using Eigen::SparseMatrix;
 using Eigen::SparseQR;
 using Eigen::VectorXd;
-SparseQR<SparseMatrix<double>, Ord> qradmm;
+using Eigen::MatrixXd;
 
 using namespace Rcpp;
 
@@ -44,6 +47,7 @@ void admm_gauss(int M,
                 double lam_z,
                 Eigen::SparseMatrix<double> const& DD,
                 double tol,
+                int linear_solver,
                 int& iter) {
   double r_norm = 0.0;
   double s_norm = 0.0;
@@ -52,27 +56,65 @@ void admm_gauss(int M,
   NumericVector tmp_m(z.size());
   NumericVector Dth(z.size());
   VectorXd tmp_theta(n);
-  SparseMatrix<double> cDD = DD * n * rho;  // a copy that doesn't change
+  VectorXd mn(n - korder);
   NumericVector W = exp(theta) * w;         // update the weights
   VectorXd eW = nvec_to_evec(W);
-  for (int i = 0; i < n; i++) {
-    cDD.diagonal()(i) += eW(i);
+  VectorXd ey;
+  VectorXd ex = nvec_to_evec(x);
+  VectorXd temp_z = VectorXd::Ones(ey.size());
+  
+  LinearSystem linear_system;
+  MatrixXd denseD;
+  VectorXd s_seq;
+  bool equal_space;
+  int computation_info;
+  SparseMatrix<double> cDD;
+  
+  if (linear_solver == 2) {
+    equal_space = is_equal_space(ex, std::sqrt(Eigen::NumTraits<double>::epsilon()));
+    denseD = MatrixXd::Zero(n - korder, korder + 1);
+    s_seq = equal_space ? VectorXd::Zero(1) : VectorXd::Zero(n);
+    Rcpp::Rcout << "equal_space: " << equal_space << std::endl;
+    Rcpp::Rcout << "s_seq: " << s_seq << std::endl;
+
+    configure_denseD(ex, denseD, s_seq, korder, equal_space);
+    Rcpp::Rcout << "denseD: " << denseD << std::endl;
+
   }
-  qradmm.compute(cDD);
+  if (linear_solver == 1) {
+    cDD = DD * n * rho;  // a copy that doesn't change
+    for (int i = 0; i < n; i++) {
+      cDD.diagonal()(i) += eW(i);
+    }
+    qradmm.compute(cDD);
+  }
 
   for (iter = 0; iter < M; iter++) {
     if (iter % 1000 == 0)
       Rcpp::checkUserInterrupt();
     // solve for primal variable - theta:
-    tmp_n = doDtv(z - u, korder, x) * n * rho;
-    tmp_n += W * y;
-    tmp_theta = nvec_to_evec(tmp_n);
-    tmp_theta = qradmm.solve(tmp_theta);
-    theta = evec_to_nvec(tmp_theta);
+    if (linear_solver == 1) {
+      tmp_n = doDtv(z - u, korder, x) * n * rho;
+      tmp_n += W * y;
+      tmp_theta = nvec_to_evec(tmp_n);
+      tmp_theta = qradmm.solve(tmp_theta);
+      theta = evec_to_nvec(tmp_theta);
+    } else {
+      tmp_n = y / exp(theta) / W - 1 + theta;
+      ey = nvec_to_evec(tmp_n); // new centered signals in Eigen
+      linear_system.construct(ey, eW, korder, rho, DD, denseD, s_seq, linear_solver);
+      linear_system.compute(linear_solver);
+      mn = nvec_to_evec(z - u);
+      std::tie(tmp_theta, computation_info) = linear_system.solve(ey, eW,
+          mn, korder, x, rho, denseD, s_seq, linear_solver, equal_space);
+      theta = evec_to_nvec(tmp_theta);
+    }
+    
     // solve for alternating variable - z:
     Dth = doDv(theta, korder, x);
     tmp_m = Dth + u;
-    z = tvdenoising::rcpp_tvd(tmp_m, lam_z);
+    z = rcpp_tvd(tmp_m, lam_z);
+
     // update dual variable - u:
     u += Dth - z;
 
@@ -107,6 +149,7 @@ void prox_newton(int M,
                  double gamma,
                  Eigen::SparseMatrix<double> const& DD,
                  double tol,
+                 int linear_solver,
                  int& total_iter) {
   double s;                       // step size
   NumericVector obj_list(M + 1);  // objective list for each iterate
@@ -129,8 +172,8 @@ void prox_newton(int M,
     // define new(centered) data for least squares problem
     std_y = centered_data(y, w, theta);
     // solve least squares problem (Gaussian TF)
-    admm_gauss(Minner, n, korder, std_y, x, w, theta, z, u, rho, lam_z, DD, tol,
-               inner_iter);
+    admm_gauss(Minner, n, korder, std_y, x, w, theta, z, u, rho, lam_z, DD, tol, 
+      linear_solver, inner_iter);
     total_iter += inner_iter;
     //  line search for step size
     s = line_search(s, lambda, alpha, gamma, y, x, w, n, korder, theta, theta_old,
@@ -173,6 +216,7 @@ Rcpp::List prox_newton_testing(int M,
                                double lambda,
                                double ls_alpha,
                                double ls_gamma,
+                               int linear_solver,
                                double tol) {
   Eigen::SparseMatrix<double> Dk;
   Eigen::SparseMatrix<double> DkDk;
@@ -186,7 +230,7 @@ Rcpp::List prox_newton_testing(int M,
   double rho = lambda;
   int iter = 0;
   prox_newton(M, Minner, Mline, n, korder, y, x, w, beta, z, u, lambda, rho,
-              ls_alpha, ls_gamma, DkDk, tol, iter);
+              ls_alpha, ls_gamma, DkDk, tol, linear_solver, iter);
   List out = List::create(Named("lambda") = lambda, Named("theta") = exp(beta),
                           Named("niter") = iter);
   return out;
