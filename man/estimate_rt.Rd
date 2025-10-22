@@ -86,8 +86,8 @@ This argument has no effect if there is a user-defined \code{lambda} sequence.}
 \item{maxiter}{Integer. Maximum number of iterations for the estimation
 algorithm.}
 
-\item{linear_solver}{Integer. The linear solver to use in the ADMM. \code{1}: QR
-decomposition, \code{2}: Kalman filter.}
+\item{linear_solver}{Integer. The linear solver to use in the ADMM. \code{qr}: QR
+decomposition, \code{kf}: Kalman filter.}
 
 \item{init}{a list of internal configuration parameters of class
 \code{rt_admm_configuration}.}
