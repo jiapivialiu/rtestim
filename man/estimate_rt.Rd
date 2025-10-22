@@ -17,6 +17,7 @@ estimate_rt(
   lambdamax = NULL,
   lambda_min_ratio = 1e-04,
   maxiter = 1e+05,
+  linear_solver = "kf",
   init = configure_rt_admm()
 )
 }
@@ -84,6 +85,9 @@ This argument has no effect if there is a user-defined \code{lambda} sequence.}
 
 \item{maxiter}{Integer. Maximum number of iterations for the estimation
 algorithm.}
+
+\item{linear_solver}{Integer. The linear solver to use in the ADMM. \code{1}: QR
+decomposition, \code{2}: Kalman filter.}
 
 \item{init}{a list of internal configuration parameters of class
 \code{rt_admm_configuration}.}

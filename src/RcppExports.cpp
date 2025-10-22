@@ -14,6 +14,28 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// admm_gauss_testing
+Rcpp::List admm_gauss_testing(int M, int korder, Rcpp::NumericVector const& y, Rcpp::NumericVector const& x, Rcpp::NumericVector const& w, Rcpp::NumericVector theta, Rcpp::NumericVector z, Rcpp::NumericVector u, double rho, double lam_z, int linear_solver, double tol);
+RcppExport SEXP _rtestim_admm_gauss_testing(SEXP MSEXP, SEXP korderSEXP, SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP thetaSEXP, SEXP zSEXP, SEXP uSEXP, SEXP rhoSEXP, SEXP lam_zSEXP, SEXP linear_solverSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type korder(korderSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector const& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type z(zSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type u(uSEXP);
+    Rcpp::traits::input_parameter< double >::type rho(rhoSEXP);
+    Rcpp::traits::input_parameter< double >::type lam_z(lam_zSEXP);
+    Rcpp::traits::input_parameter< int >::type linear_solver(linear_solverSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(admm_gauss_testing(M, korder, y, x, w, theta, z, u, rho, lam_z, linear_solver, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // prox_newton_testing
 Rcpp::List prox_newton_testing(int M, int Minner, int Mline, int korder, Rcpp::NumericVector const& y, Rcpp::NumericVector const& x, Rcpp::NumericVector const& w, double lambda, double ls_alpha, double ls_gamma, int linear_solver, double tol);
 RcppExport SEXP _rtestim_prox_newton_testing(SEXP MSEXP, SEXP MinnerSEXP, SEXP MlineSEXP, SEXP korderSEXP, SEXP ySEXP, SEXP xSEXP, SEXP wSEXP, SEXP lambdaSEXP, SEXP ls_alphaSEXP, SEXP ls_gammaSEXP, SEXP linear_solverSEXP, SEXP tolSEXP) {
@@ -504,6 +526,7 @@ RcppExport SEXP _rtestim_RcppExport_registerCCallable() {
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_rtestim_admm_gauss_testing", (DL_FUNC) &_rtestim_admm_gauss_testing, 12},
     {"_rtestim_prox_newton_testing", (DL_FUNC) &_rtestim_prox_newton_testing, 12},
     {"_rtestim_smat_to_mat", (DL_FUNC) &_rtestim_smat_to_mat, 3},
     {"_rtestim_configure_denseD_test", (DL_FUNC) &_rtestim_configure_denseD_test, 2},

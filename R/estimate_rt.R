@@ -67,8 +67,8 @@
 #'   `lambda` sequence, where `lambdamin = lambda_min_ratio * lambdamax`.
 #'   A very small value will lead to the solution `Rt = log(observed_counts)`.
 #'   This argument has no effect if there is a user-defined `lambda` sequence.
-#' @param linear_solver Integer. The linear solver to use in the ADMM. `1`: QR 
-#'    decomposition, `2`: Kalman filter.
+#' @param linear_solver Integer. The linear solver to use in the ADMM. `qr`: QR 
+#'    decomposition, `kf`: Kalman filter.
 #'
 #' @return An object with S3 class `poisson_rt`. Among the list components:
 #' * `observed_counts` the observed daily infection counts.
