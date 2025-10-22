@@ -40,6 +40,13 @@ void LinearSystem::construct(const Eigen::VectorXd& y, const Eigen::ArrayXd& wei
       LinearSystem::kf_init(n, k, rho, Dseq, s_seq);
       break;
     }
+    case 3: {
+      wy = (y.array() * weights).matrix();
+      A = rho * dk_mat_sq;
+      A.diagonal().array() += weights;
+      A.makeCompressed();
+      break;
+    }
   } 
 }
 
@@ -61,6 +68,10 @@ void LinearSystem::compute(int solver) {
     }
     case 2:
       break;
+    case 3: {
+      cholesky.compute(A);
+      break;
+    }
   }
 }
 
@@ -83,6 +94,12 @@ std::tuple<VectorXd,int> LinearSystem::solve(const Eigen::VectorXd& y,
     }
     case 2: {
       LinearSystem::kf_iter(y, weights, adj_mean, Dseq, s_seq, equal_space);
+      break;
+    }
+    case 3: {
+      VectorXd v = wy + rho * Dktv(adj_mean, k, x);
+      sol = cholesky.solve(v);
+      info = int(cholesky.info());
       break;
     }
   }
@@ -144,9 +161,21 @@ void LinearSystem::kf_init(int n, int k, double rho, const Eigen::MatrixXd& Dseq
   Kinf = MatrixXd::Zero(k, n);
   Kt_b = VectorXd::Zero(k);
   Kinf_b = VectorXd::Zero(k);
+  // Fix: Add safety checks for division by zero
   RQR = s_seq.array().square().inverse();
-  RQR *= 1 / sqrt(rho / n); 
-  z = n * sqrt(rho / n);
+  // Check for infinities and replace with large finite values
+  for (int i = 0; i < RQR.size(); i++) {
+    if (!std::isfinite(RQR(i))) {
+      RQR(i) = 1e6;  // Use large but finite value
+    }
+  }
+  double rho_factor = sqrt(rho / n);
+  if (rho_factor > 0) {
+    RQR *= 1 / rho_factor; 
+  } else {
+    RQR.setOnes();  // Default to 1 if rho_factor is zero
+  }
+  z = n * rho_factor;
   T.row(0) = Dseq.row(0);
   // backward: 
   r = VectorXd::Zero(k);
@@ -205,9 +234,15 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& y, const Eigen::ArrayXd& w,
   for (int i = n - 1; i >= d; i--) {
     P1 = Map<MatrixXd>(Pt.col(i + 1).data(), k, k);
     sol(i) = at.col(i + 1)(0) - P1.row(0) * r;
-    L0.col(0) = Kt.col(i) / Ft(i);
-    r1 = r - L0.transpose() * r;
-    r1(0) -=  vt(i) / Ft(i); 
+    // Add safety check for division by zero
+    if (std::abs(Ft(i)) > 1e-12) {
+      L0.col(0) = Kt.col(i) / Ft(i);
+      r1 = r - L0.transpose() * r;
+      r1(0) -=  vt(i) / Ft(i); 
+    } else {
+      L0.col(0).setZero();
+      r1 = r;
+    }
     r = T.transpose() * r1;
     // update transition matrix T for next iterate:
     if (!equal_space && i > d)
@@ -219,7 +254,7 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& y, const Eigen::ArrayXd& w,
     a1 = at.col(i + 1);
     sol(i) = a1(0) - P1.row(0) * r - P1inf.row(0) * r1;
     if (i > 0) {
-      if (Finf(i) > 0) {
+      if (Finf(i) > 1e-12) {
         // simple version w/o mat multiplication:
         L0.col(0) = Kinf.col(i) / Finf(i);
         L1.col(0) = L0.col(0) * Ft(i) / Finf(i);
@@ -229,13 +264,17 @@ void LinearSystem::kf_iter(const Eigen::VectorXd& y, const Eigen::ArrayXd& w,
         r1 = T.transpose() * rtmp;
         rtmp = r - L0.transpose() * r;
         r = T.transpose() * rtmp;
-      } else {
+      } else if (std::abs(Ft(i)) > 1e-12) {
         L1.col(0) = Kt.col(i) / Ft(i);
         rtmp = r - L1.transpose() * r;
         rtmp(0) -= vt(i) / Ft(i);
         r = T.transpose() * rtmp;
         rtmp = r1 - L1.transpose() * r1;
         r1 = T.transpose() * rtmp;
+      } else {
+        // Both Finf and Ft are near zero, use identity
+        r = T.transpose() * r;
+        r1 = T.transpose() * r1;
       }
     }
   }
